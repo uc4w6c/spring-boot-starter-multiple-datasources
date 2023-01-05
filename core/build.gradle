@@ -1,0 +1,11 @@
+description = "Spring Starter Multiple Datasources Core"
+
+ext {
+    hikariCPVersion = '5.0.1'
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot:${springBootVersion}"
+    implementation "org.springframework:spring-jdbc:6.0.3" // あとで変更する
+    implementation "com.zaxxer:HikariCP:${hikariCPVersion}"
+}

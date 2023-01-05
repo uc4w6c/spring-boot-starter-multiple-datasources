@@ -1,0 +1,11 @@
+description = "Spring Starter Multiple Datasources MyBatis"
+
+ext {
+    mybatisVersion = '3.5.11'
+}
+
+dependencies {
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${springBootVersion}"
+
+    implementation project(':core')
+}

@@ -1,0 +1,19 @@
+spring:
+  datasources:
+    first:
+      url: jdbc:h2:mem:mydb
+      username: sa
+      password:
+      driverClassName: org.h2.Driver
+      # type: com.zaxxer.hikari.HikariDataSource
+    second:
+      url: jdbc:h2:tcp://localhost:9090/mem:mydb
+      username: sa
+      password:
+      driverClassName: org.h2.Driver
+      # type: com.zaxxer.hikari.HikariDataSource
+mybatis:
+  first:
+    mapper-locations: classpath*:/com/example/first/*.xml
+  second:
+    mapper-locations: classpath*:/com/example/second/*.xml
