@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface BookRepository {
   BookEntity getBook(@Param("id") String id);
+
+  void insertBook(BookEntity book);
 }

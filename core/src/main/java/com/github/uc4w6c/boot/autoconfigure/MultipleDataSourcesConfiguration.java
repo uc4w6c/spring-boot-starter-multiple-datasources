@@ -1,5 +1,7 @@
 package com.github.uc4w6c.boot.autoconfigure;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -8,11 +10,18 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.transaction.TransactionProperties;
 import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -22,12 +31,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.util.StringUtils;
 
 @Configuration
 @ConditionalOnClass(DataSource.class)
-// @EnableConfigurationProperties(MultipleDataSourcesProperties.class)
-@Import(MultipleDataSourcesConfiguration.MultipleDataSourceRegistrar.class)
+@Import({MultipleDataSourcesConfiguration.MultipleDataSourceRegistrar.class, MultipleDataSourcesConfiguration.MultipleTransactionRegistrar.class})
 public class MultipleDataSourcesConfiguration {
   static class MultipleDataSourceRegistrar
       implements ImportBeanDefinitionRegistrar, EnvironmentAware {
@@ -58,7 +67,6 @@ public class MultipleDataSourcesConfiguration {
     @Override
     public void registerBeanDefinitions(
         AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-      // TODO: おそらくTransactionの設定も必要
       for (Map.Entry<String, DataSourceProperties> entry :
           multipleDataSourcesProperties.entrySet()) {
         DataSourceProperties dataSourceProperties = entry.getValue();
@@ -116,6 +124,77 @@ public class MultipleDataSourcesConfiguration {
     @SuppressWarnings("unchecked")
     private static <T> T createDataSource(DataSourceProperties properties, Class<? extends DataSource> type) {
       return (T) properties.initializeDataSourceBuilder().type(type).build();
+    }
+  }
+
+  static class MultipleTransactionRegistrar
+      implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanFactoryAware {
+
+    private final String TRANSACTION_PREFIX = "spring.transactions";
+    private static final String SUFFIXED_TRANSACTION_PROPERTIES_BEAN_NAME = "_transaction_properties";
+    private static final String SUFFIXED_TRANSACTION_BEAN_NAME = "_transaction_manager";
+
+    private ListableBeanFactory listableBeanFactory;
+
+    private Map<String, TransactionProperties> transactionProperties;
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+      if (beanFactory instanceof ListableBeanFactory listableBeanFactory) {
+        this.listableBeanFactory = listableBeanFactory;
+      }
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+      BindResult<Map<String, TransactionProperties>> bind =
+          Binder.get(environment)
+              .bind(TRANSACTION_PREFIX, Bindable.mapOf(String.class, TransactionProperties.class));
+
+      transactionProperties = bind.orElse(Collections.emptyMap());
+    }
+
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+      String[] datasouceBeanNames = listableBeanFactory.getBeanNamesForType(DataSource.class);
+      for (String beanName : datasouceBeanNames) {
+        DataSource dataSource = listableBeanFactory.getBean(beanName, DataSource.class);
+
+        BeanDefinitionBuilder dataSourceTransactionManagerBuild =
+            BeanDefinitionBuilder.genericBeanDefinition(DataSourceTransactionManagerFactoryBean.class);
+        GenericBeanDefinition dataSourceTransactionManagerBeanDefinition =
+            (GenericBeanDefinition) dataSourceTransactionManagerBuild.getBeanDefinition();
+
+        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager(dataSource);
+        if (!beanName.contains("_datasource")) {
+          continue;
+        }
+        String keyName = beanName.replace("_datasource", "");
+        if (transactionProperties.containsKey(keyName)) {
+          transactionProperties.get(keyName).customize(dataSourceTransactionManager);
+        }
+
+        dataSourceTransactionManagerBeanDefinition
+            .getConstructorArgumentValues()
+            .addGenericArgumentValue(dataSourceTransactionManager);
+        registry.registerBeanDefinition(
+            keyName + SUFFIXED_TRANSACTION_BEAN_NAME,
+            dataSourceTransactionManagerBeanDefinition);
+      }
+
+      for (Map.Entry<String, TransactionProperties> entry :
+          transactionProperties.entrySet()) {
+        BeanDefinitionBuilder transactionPropertiesBuild =
+            BeanDefinitionBuilder.genericBeanDefinition(TransactionPropertiesFactoryBean.class);
+        GenericBeanDefinition transactionPropertiesBeanDefinition =
+            (GenericBeanDefinition) transactionPropertiesBuild.getBeanDefinition();
+
+        transactionPropertiesBeanDefinition
+            .getConstructorArgumentValues()
+            .addGenericArgumentValue(entry.getValue());
+        registry.registerBeanDefinition(
+            entry.getKey() + SUFFIXED_TRANSACTION_PROPERTIES_BEAN_NAME,
+            transactionPropertiesBeanDefinition);
+      }
     }
   }
 

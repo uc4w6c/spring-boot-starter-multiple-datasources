@@ -4,9 +4,8 @@ import com.example.first.UserEntity;
 import com.example.first.UserRepository;
 import com.example.second.BookEntity;
 import com.example.second.BookRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("db")
@@ -21,8 +20,22 @@ public class DatabaseController {
 
   @GetMapping
   public String index() {
-    UserEntity user = userRepository.getUser(1);
-    BookEntity book = bookRepository.getBook("1");
+    UserEntity user = userRepository.getUser(2);
+    System.out.println(user.getName());
+    BookEntity book = bookRepository.getBook("2");
     return user.getName() + " : " + book.getName();
+  }
+
+  @PostMapping
+  @Transactional(transactionManager = "first_transaction_manager")
+  public void insert() {
+    UserEntity user = new UserEntity(2, "hanako");
+    BookEntity book = new BookEntity(2, "Effective");
+
+    boolean isError = true;
+
+    userRepository.insertUser(user);
+    if (isError) throw new RuntimeException();
+    bookRepository.insertBook(book);
   }
 }

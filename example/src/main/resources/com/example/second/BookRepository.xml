@@ -6,4 +6,8 @@
     <select id="getBook" resultType="com.example.second.BookEntity">
         SELECT * FROM books WHERE id = #{id}
     </select>
+    <insert id="insertBook">
+        insert into books (id,name)
+        values (#{id},#{name})
+    </insert>
 </mapper>
