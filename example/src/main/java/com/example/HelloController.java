@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sql.DataSource;
-
 @RestController
 @RequestMapping("hello")
 public class HelloController {
@@ -21,7 +19,8 @@ public class HelloController {
   }
    */
 
-  public HelloController(@Qualifier("first_datasource_properties") DataSourceProperties dataSourceProperties) {
+  public HelloController(
+      @Qualifier("first_datasource_properties") DataSourceProperties dataSourceProperties) {
     this.dataSourceProperties = dataSourceProperties;
   }
 
