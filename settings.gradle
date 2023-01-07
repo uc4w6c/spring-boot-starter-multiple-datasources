@@ -6,5 +6,4 @@ include 'bom'
 
 include 'modules:mybatis'
 
-// TODO: 後で削除
 include 'example'

@@ -90,7 +90,6 @@ public class MultipleDataSourcesConfiguration {
 
         dataSourceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSource);
 
-        // 一旦はデフォルトのdatasourceのみを作成しそれ以外のType指定は別途対応する
         registry.registerBeanDefinition(
             entry.getKey() + SUFFIXED_DATASOURCE_BEAN_NAME, dataSourceBeanDefinition);
       }
@@ -107,6 +106,7 @@ public class MultipleDataSourcesConfiguration {
           };
 
       Class dataSourceTypeClass = dataSourceProperties.getType();
+      // TODO: need to create a datasource other than HikariCP
       if (dataSourceTypeClass == null) {
         return createHikariDataSource.apply(dataSourceProperties);
       } else if ("com.zaxxer.hikari.HikariDataSource".equals(dataSourceTypeClass)) {
@@ -154,6 +154,8 @@ public class MultipleDataSourcesConfiguration {
     @Override
     public void registerBeanDefinitions(
         AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+
+      // DataSourceTransactionManager
       String[] datasouceBeanNames = listableBeanFactory.getBeanNamesForType(DataSource.class);
       for (String beanName : datasouceBeanNames) {
         DataSource dataSource = listableBeanFactory.getBean(beanName, DataSource.class);
@@ -181,6 +183,7 @@ public class MultipleDataSourcesConfiguration {
             keyName + SUFFIXED_TRANSACTION_BEAN_NAME, dataSourceTransactionManagerBeanDefinition);
       }
 
+      // TransactionProperties
       for (Map.Entry<String, TransactionProperties> entry : transactionProperties.entrySet()) {
         BeanDefinitionBuilder transactionPropertiesBuild =
             BeanDefinitionBuilder.genericBeanDefinition(TransactionPropertiesFactoryBean.class);
@@ -196,67 +199,4 @@ public class MultipleDataSourcesConfiguration {
       }
     }
   }
-
-  /*
-  public static class MultipleDataSourceRegistrar
-      implements ImportBeanDefinitionRegistrar, EnvironmentAware {
-    private MultipleDataSourcesProperties multipleDataSourcesProperties;
-
-    @Override
-    public void setEnvironment(Environment environment) {
-      BindResult<MultipleDataSourcesProperties> bind =
-          Binder.get(environment)
-              .bind(MultipleDataSourcesProperties.PREFIX, MultipleDataSourcesProperties.class);
-
-      multipleDataSourcesProperties =
-          bind.orElseThrow(
-              () ->
-                  new MultipleDataSourcesException(
-                      String.format("Please set %s", MultipleDataSourcesProperties.PREFIX)));
-      if (multipleDataSourcesProperties.datasources().isEmpty()) {
-        throw new MultipleDataSourcesException("Please Set at least one Datasource.");
-      }
-    }
-
-    @Override
-    public void registerBeanDefinitions(
-        AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-      for (Map.Entry<String, DataSourceProperties> entry :
-          multipleDataSourcesProperties.datasources().entrySet()) {
-        BeanDefinitionBuilder dataSourceBuild =
-            BeanDefinitionBuilder.genericBeanDefinition(DataSourceFactoryBean.class);
-        GenericBeanDefinition dataSourceBeanDefinition =
-            (GenericBeanDefinition) dataSourceBuild.getBeanDefinition();
-        dataSourceBeanDefinition
-            .getConstructorArgumentValues()
-            .addGenericArgumentValue(entry.getValue());
-
-        // TODO: Bean名は"xx_datasource"に変えるかも
-        registry.registerBeanDefinition(entry.getKey(), dataSourceBeanDefinition);
-      }
-    }
-  }
-   */
-  /*
-   public static class MultipleDataSourceRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
-     private BeanFactory beanFactory;
-
-     @Override
-     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-       this.beanFactory = beanFactory;
-     }
-
-     @Override
-     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-       MultipleDataSourcesProperties multipleDataSourcesProperties = beanFactory.getBean(MultipleDataSourcesProperties.class.getName(), MultipleDataSourcesProperties.class);
-       for (Map.Entry<String, DataSourceProperties> entry : multipleDataSourcesProperties.datasource().entrySet()) {
-         BeanDefinitionBuilder dataSourceBuild = BeanDefinitionBuilder.genericBeanDefinition(DataSourceFactoryBean.class);
-         GenericBeanDefinition dataSourceBeanDefinition = (GenericBeanDefinition) dataSourceBuild.getBeanDefinition();
-         dataSourceBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(entry.getValue());
-
-         registry.registerBeanDefinition(entry.getKey(), dataSourceBeanDefinition);
-       }
-     }
-   }
-  */
 }

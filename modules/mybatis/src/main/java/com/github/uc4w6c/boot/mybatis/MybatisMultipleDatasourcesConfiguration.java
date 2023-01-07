@@ -40,7 +40,6 @@ import org.springframework.util.StringUtils;
 
 @Configuration
 @ConditionalOnClass(DataSource.class)
-// @EnableConfigurationProperties(MybatisMultipleDataSourcesProperties.class)
 @Import(MybatisMultipleDatasourcesConfiguration.MybatisMultipleDatasourcesRegistar.class)
 @AutoConfigureAfter(MultipleDataSourcesConfiguration.class)
 public class MybatisMultipleDatasourcesConfiguration {
@@ -102,79 +101,6 @@ public class MybatisMultipleDatasourcesConfiguration {
           keyName + SUFFIXED_MYBATIS_PROPERTIES_BEAN_NAME, mybatisPropertiesBeanDefinition);
     }
 
-    /*
-    private SqlSessionFactory registerBeanSqlSessionFactory(
-        String keyName, MybatisProperties mybatisProperties, BeanDefinitionRegistry registry) {
-      DataSource dataSource;
-      try {
-        dataSource = beanFactory.getBean(keyName + "_datasource", DataSource.class);
-      } catch (NoSuchBeanDefinitionException e) {
-        throw new MybatisMultipleException("datasource not found.");
-      }
-
-      SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
-      factory.setDataSource(dataSource);
-      if (mybatisProperties.getConfiguration() == null
-          || mybatisProperties.getConfiguration().getVfsImpl() == null) {
-        factory.setVfs(SpringBootVFS.class);
-      }
-
-      // 以下エラーになるため一旦別の方法で取得
-      // ResourceLoader resourceLoader = beanFactory.getBean(ResourceLoader.class);
-      if (StringUtils.hasText(mybatisProperties.getConfigLocation())) {
-        // factory.setConfigLocation(
-        //     resourceLoader.getResource(mybatisProperties.getConfigLocation()));
-        // TDOO: 以下は暫定
-        try {
-          factory.setConfigLocation(
-              new PathMatchingResourcePatternResolver().getResource(mybatisProperties.getConfigLocation()));
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
-      factory.setConfiguration(new org.apache.ibatis.session.Configuration());
-      if (mybatisProperties.getConfigurationProperties() != null) {
-        factory.setConfigurationProperties(mybatisProperties.getConfigurationProperties());
-      }
-      if (StringUtils.hasLength(mybatisProperties.getTypeAliasesPackage())) {
-        factory.setTypeAliasesPackage(mybatisProperties.getTypeAliasesPackage());
-      }
-      if (mybatisProperties.getTypeAliasesSuperType() != null) {
-        factory.setTypeAliasesSuperType(mybatisProperties.getTypeAliasesSuperType());
-      }
-      if (StringUtils.hasLength(mybatisProperties.getTypeHandlersPackage())) {
-        factory.setTypeHandlersPackage(mybatisProperties.getTypeHandlersPackage());
-      }
-      Resource[] mapperLocations = mybatisProperties.resolveMapperLocations();
-      if (!ObjectUtils.isEmpty(mapperLocations)) {
-        factory.setMapperLocations(mapperLocations);
-      }
-      Set<String> factoryPropertyNames =
-          Stream.of(new BeanWrapperImpl(SqlSessionFactoryBean.class).getPropertyDescriptors())
-              .map(PropertyDescriptor::getName)
-              .collect(Collectors.toSet());
-      Class<? extends LanguageDriver> defaultLanguageDriver =
-          mybatisProperties.getDefaultScriptingLanguageDriver();
-      if (factoryPropertyNames.contains("defaultScriptingLanguageDriver")) {
-        factory.setDefaultScriptingLanguageDriver(defaultLanguageDriver);
-      }
-
-      BeanDefinitionBuilder sqlSessionFactoryBuild =
-          BeanDefinitionBuilder.genericBeanDefinition(SqlSessionFactoryBean.class);
-      GenericBeanDefinition sqlSessionBeanDefinition =
-          (GenericBeanDefinition) sqlSessionFactoryBuild.getBeanDefinition();
-      sqlSessionBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(factory);
-
-      registry.registerBeanDefinition(
-          keyName + SUFFIXED_SQL_SESSION_FACTORY_PROPERTIES_BEAN_NAME, sqlSessionBeanDefinition);
-
-      try {
-        return factory.getObject();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-     */
     private SqlSessionFactory registerBeanSqlSessionFactory(
         String keyName, MybatisProperties mybatisProperties, BeanDefinitionRegistry registry) {
       DataSource dataSource;
@@ -196,12 +122,7 @@ public class MybatisMultipleDatasourcesConfiguration {
         sqlSessionFactoryBuild.addPropertyValue("vfs", SpringBootVFS.class);
       }
 
-      // 以下エラーになるため一旦別の方法で取得
-      // ResourceLoader resourceLoader = beanFactory.getBean(ResourceLoader.class);
       if (StringUtils.hasText(mybatisProperties.getConfigLocation())) {
-        // factory.setConfigLocation(
-        //     resourceLoader.getResource(mybatisProperties.getConfigLocation()));
-        // TDOO: 以下は暫定
         try {
           factory.setConfigLocation(
               new PathMatchingResourcePatternResolver()
