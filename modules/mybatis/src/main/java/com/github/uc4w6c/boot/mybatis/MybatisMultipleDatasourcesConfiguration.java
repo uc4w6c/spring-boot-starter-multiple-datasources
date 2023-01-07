@@ -2,7 +2,6 @@ package com.github.uc4w6c.boot.mybatis;
 
 import com.github.uc4w6c.boot.autoconfigure.MultipleDataSourcesConfiguration;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,7 +33,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ObjectUtils;
@@ -205,29 +203,39 @@ public class MybatisMultipleDatasourcesConfiguration {
         //     resourceLoader.getResource(mybatisProperties.getConfigLocation()));
         // TDOO: 以下は暫定
         try {
-          factory.setConfigLocation(new PathMatchingResourcePatternResolver().getResource(mybatisProperties.getConfigLocation()));
-          sqlSessionFactoryBuild.addPropertyValue("configLocation", new PathMatchingResourcePatternResolver().getResource(mybatisProperties.getConfigLocation()));
+          factory.setConfigLocation(
+              new PathMatchingResourcePatternResolver()
+                  .getResource(mybatisProperties.getConfigLocation()));
+          sqlSessionFactoryBuild.addPropertyValue(
+              "configLocation",
+              new PathMatchingResourcePatternResolver()
+                  .getResource(mybatisProperties.getConfigLocation()));
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
       factory.setConfiguration(new org.apache.ibatis.session.Configuration());
-      sqlSessionFactoryBuild.addPropertyValue("configuration", new org.apache.ibatis.session.Configuration());
+      sqlSessionFactoryBuild.addPropertyValue(
+          "configuration", new org.apache.ibatis.session.Configuration());
       if (mybatisProperties.getConfigurationProperties() != null) {
         factory.setConfigurationProperties(mybatisProperties.getConfigurationProperties());
-        sqlSessionFactoryBuild.addPropertyValue("configurationProperties", mybatisProperties.getConfigurationProperties());
+        sqlSessionFactoryBuild.addPropertyValue(
+            "configurationProperties", mybatisProperties.getConfigurationProperties());
       }
       if (StringUtils.hasLength(mybatisProperties.getTypeAliasesPackage())) {
         factory.setTypeAliasesPackage(mybatisProperties.getTypeAliasesPackage());
-        sqlSessionFactoryBuild.addPropertyValue("typeAliasesPackage", mybatisProperties.getTypeAliasesPackage());
+        sqlSessionFactoryBuild.addPropertyValue(
+            "typeAliasesPackage", mybatisProperties.getTypeAliasesPackage());
       }
       if (mybatisProperties.getTypeAliasesSuperType() != null) {
         factory.setTypeAliasesSuperType(mybatisProperties.getTypeAliasesSuperType());
-        sqlSessionFactoryBuild.addPropertyValue("typeAliasesSuperType", mybatisProperties.getTypeAliasesSuperType());
+        sqlSessionFactoryBuild.addPropertyValue(
+            "typeAliasesSuperType", mybatisProperties.getTypeAliasesSuperType());
       }
       if (StringUtils.hasLength(mybatisProperties.getTypeHandlersPackage())) {
         factory.setTypeHandlersPackage(mybatisProperties.getTypeHandlersPackage());
-        sqlSessionFactoryBuild.addPropertyValue("typeHandlersPackage", mybatisProperties.getTypeHandlersPackage());
+        sqlSessionFactoryBuild.addPropertyValue(
+            "typeHandlersPackage", mybatisProperties.getTypeHandlersPackage());
       }
       Resource[] mapperLocations = mybatisProperties.resolveMapperLocations();
       if (!ObjectUtils.isEmpty(mapperLocations)) {
@@ -242,11 +250,13 @@ public class MybatisMultipleDatasourcesConfiguration {
           mybatisProperties.getDefaultScriptingLanguageDriver();
       if (factoryPropertyNames.contains("defaultScriptingLanguageDriver")) {
         factory.setDefaultScriptingLanguageDriver(defaultLanguageDriver);
-        sqlSessionFactoryBuild.addPropertyValue("defaultScriptingLanguageDriver", defaultLanguageDriver);
+        sqlSessionFactoryBuild.addPropertyValue(
+            "defaultScriptingLanguageDriver", defaultLanguageDriver);
       }
 
       registry.registerBeanDefinition(
-          keyName + SUFFIXED_SQL_SESSION_FACTORY_PROPERTIES_BEAN_NAME, sqlSessionFactoryBuild.getBeanDefinition());
+          keyName + SUFFIXED_SQL_SESSION_FACTORY_PROPERTIES_BEAN_NAME,
+          sqlSessionFactoryBuild.getBeanDefinition());
 
       try {
         return factory.getObject();

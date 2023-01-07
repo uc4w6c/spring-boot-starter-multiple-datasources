@@ -16,16 +16,12 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // こちらも原因不明だがバージョン指定が必要みたいあとで修正
     implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${springBootVersion}"
-    // 原因不明だが追加
-    implementation 'org.mybatis:mybatis:3.5.11'
 
     implementation 'org.flywaydb:flyway-core'
     implementation 'com.h2database:h2'
     implementation project(':core')
     implementation project(':modules:mybatis')
-    // runtimeOnly 'org.postgresql:postgresql:42.5.1'
 }
 
 tasks.named('test') {

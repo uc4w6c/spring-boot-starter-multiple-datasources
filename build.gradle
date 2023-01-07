@@ -29,7 +29,7 @@ subprojects {
 	}
 
 	dependencies {
-		implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
+		implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
 	}
 
 	tasks.named('test') {
