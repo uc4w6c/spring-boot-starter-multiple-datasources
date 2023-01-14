@@ -1,6 +1,11 @@
 description = "Spring Starter Multiple Datasources MyBatis"
 
+archivesBaseName = 'spring-boot-starter-multiple-datasources-mybatis'
+
+apply from: "$rootDir/gradle/publishing.gradle"
+
 dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
     implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${springBootVersion}"
 
     implementation project(':core')

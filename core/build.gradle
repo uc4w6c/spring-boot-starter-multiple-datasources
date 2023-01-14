@@ -1,6 +1,13 @@
 description = "Spring Starter Multiple Datasources Core"
 
+// archivesBaseName = 'spring-boot-starter-multiple-datasources-core'
+archivesBaseName = 'spring-boot-starter-multiple-datasources'
+
+apply from: "$rootDir/gradle/publishing.gradle"
+
 dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+
     implementation "org.springframework.boot:spring-boot"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.springframework:spring-jdbc"

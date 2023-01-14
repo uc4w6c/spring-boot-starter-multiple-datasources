@@ -1,1 +1,32 @@
 description = "Spring Starter Multiple Datasources BOM"
+
+archivesBaseName = 'spring-boot-starter-multiple-datasources-bom'
+
+apply from: "$rootDir/gradle/publishing.gradle"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            artifactId = project.archivesBaseName
+            artifacts = []
+
+            pom {
+                packaging = 'pom'
+
+                withXml {
+                    def dependencyManagementNode = asNode().appendNode('dependencyManagement').appendNode('dependencies')
+
+                    def addDependencies = { groupId, artifactId, version ->
+                        dependencyManagementNode.appendNode('dependency').with {
+                            appendNode('groupId', groupId)
+                            appendNode('artifactId', artifactId)
+                            appendNode('version', version)
+                        }
+                    }
+                    addDependencies(project.group, 'spring-boot-starter-multiple-datasources', project.releaseVersion)
+                    addDependencies(project.group, 'spring-boot-starter-multiple-datasources-mybatis', project.releaseVersion)
+                }
+            }
+        }
+    }
+}

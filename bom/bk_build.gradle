@@ -1,0 +1,60 @@
+description = "Spring Starter Multiple Datasources BOM"
+
+archivesBaseName = 'spring-boot-starter-multiple-datasources-bom'
+
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            artifacts = []
+
+            pom {
+                name = 'Spring Boot Starter Multiple DataSources'
+                description = 'Spring Boot Starter Multiple DataSources helps you work with multiple datasources.'
+                url = 'https://github.com/uc4w6c/spring-boot-starter-multiple-datasources'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'uc4w6c'
+                        name = 'Yuta Saito'
+                        email = 'uc4w6c@bma.biglobe.ne.jp'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/uc4w6c/spring-boot-starter-multiple-datasources.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:uc4w6c/spring-boot-starter-multiple-datasources.git'
+                    url = 'https://github.com/uc4w6c/spring-boot-starter-multiple-datasources'
+                }
+                withXml {
+                    def dependencyManagementNode = asNode().appendNode('dependencyManagement').appendNode('dependencies')
+
+                    dependencyManagementNode.appendNode('dependency').with {
+                        appendNode('groupId', project.group)
+                        appendNode('artifactId', 'spring-boot-starter-multiple-datasources-mybatis')
+                        appendNode('version', $ { releaseVersion })
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = "${sonatypeUsername}"
+                password = "${sonatypePassword}"
+            }
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+}

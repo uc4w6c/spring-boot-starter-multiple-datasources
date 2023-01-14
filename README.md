@@ -5,8 +5,8 @@ Spring Boot Starter Multiple DataSources helps you work with multiple datasource
 ### Gradle
 ```groovy
 dependencies {
-    implementation platform('com.github.uc4w6c:spring-boot-starter-multiple-datasources:1.0.0')
-    implementation 'com.github.uc4w6c:spring-boot-starter-multiple-datasources-mybatis'
+    implementation platform('io.github.uc4w6c:spring-boot-starter-multiple-datasources:1.0.0')
+    implementation 'io.github.uc4w6c:spring-boot-starter-multiple-datasources-mybatis'
 }
 ```
 

@@ -1,0 +1,70 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+/*
+task sourceJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc
+}
+
+artifacts {
+    archives javadocJar, sourceJar
+}
+ */
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) { publication ->
+            artifactId = project.archivesBaseName
+
+            from components.java
+            pom {
+                name = 'Spring Boot Starter Multiple DataSources'
+                description = 'Spring Boot Starter Multiple DataSources helps you work with multiple datasources.'
+                url = 'https://github.com/uc4w6c/spring-boot-starter-multiple-datasources'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'uc4w6c'
+                        name = 'Yuta Saito'
+                        email = 'uc4w6c@bma.biglobe.ne.jp'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/uc4w6c/spring-boot-starter-multiple-datasources.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:uc4w6c/spring-boot-starter-multiple-datasources.git'
+                    url = 'https://github.com/uc4w6c/spring-boot-starter-multiple-datasources'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = "${sonatypeUsername}"
+                password = "${sonatypePassword}"
+            }
+        }
+    }
+}
+
+signing {
+    // sign configurations.archives
+    sign publishing.publications.mavenJava
+}
